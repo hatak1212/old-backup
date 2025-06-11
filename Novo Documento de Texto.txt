@@ -1,5 +1,5 @@
 local IceHub = {}
-local Options = loadstring(game:HttpGet('https://gist.githubusercontent.com/hatak1212/2962f27017185dce49f9bde254dce0d9/raw/685e12e1e8b1b255babfc2ee456cad0c83b48df2/gistfile1.txt'))()
+local Options = loadstring(game:HttpGet('https://gist.githubusercontent.com/hatak1212/1061fce46a132127ee16e3156eee6763/raw/51828610998f20eb73299aca919db83b00afaa4b/gistfile1.txt'))()
 
 local GameTitle = Options.BrookhavenTitle
 local titlecolor = Options.TitleColor
