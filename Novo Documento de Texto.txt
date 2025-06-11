@@ -1,12 +1,19 @@
 local IceHub = {}
-local Options = loadstring(game:HttpGet('https://gist.githubusercontent.com/hatak1212/1061fce46a132127ee16e3156eee6763/raw/51828610998f20eb73299aca919db83b00afaa4b/gistfile1.txt'))()
+local Options = {
+    BrookhavenTitle = "Ice Hub - Brookhaven",
+    TitleColor = Color3.fromRGB(0, 255, 255),
+    LabelColor = Color3.fromRGB(255, 255, 255),
+    ButtonColor = Color3.fromRGB(100, 100, 255),
+    ToggleOnColor = Color3.fromRGB(0, 255, 0),
+    ToggleOffColor = Color3.fromRGB(255, 0, 0),
+    DropdownColor = Color3.fromRGB(200, 200, 255),
+    TextBoxColor = Color3.fromRGB(240, 240, 240),
+    Owners = {"IceMael7", "Douglinhas"},
+    Discord1 = "discord.gg/icehub",
+    Discord2 = "discord.gg/icealt",
+}
 
-local GameTitle = Options.BrookhavenTitle
-local titlecolor = Options.TitleColor
-local labelcolor = Options.LabelColor
-local owners = Options.Owners
-local discord1 = Options.Discord1
-local discord2 = Options.Discord2
+IceHub.Options = Options
 
 function IceHub.CreateMain()
 	local Library = Instance.new("ScreenGui")
