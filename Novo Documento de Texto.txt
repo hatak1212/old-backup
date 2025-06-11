@@ -1,4 +1,12 @@
 local IceHub = {}
+local Options = loadstring(game:HttpGet('https://gist.githubusercontent.com/hatak1212/2962f27017185dce49f9bde254dce0d9/raw/685e12e1e8b1b255babfc2ee456cad0c83b48df2/gistfile1.txt'))()
+
+local GameTitle = Options.BrookhavenTitle
+local titlecolor = Options.TitleColor
+local labelcolor = Options.LabelColor
+local owners = Options.Owners
+local discord1 = Options.Discord1
+local discord2 = Options.Discord2
 
 function IceHub.CreateMain()
 	local Library = Instance.new("ScreenGui")
