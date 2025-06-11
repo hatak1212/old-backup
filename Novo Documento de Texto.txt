@@ -1,19 +1,18 @@
 local IceHub = {}
-local Options = {
-    BrookhavenTitle = "Ice Hub - Brookhaven",
-    TitleColor = Color3.fromRGB(0, 255, 255),
-    LabelColor = Color3.fromRGB(255, 255, 255),
-    ButtonColor = Color3.fromRGB(100, 100, 255),
-    ToggleOnColor = Color3.fromRGB(0, 255, 0),
-    ToggleOffColor = Color3.fromRGB(255, 0, 0),
-    DropdownColor = Color3.fromRGB(200, 200, 255),
-    TextBoxColor = Color3.fromRGB(240, 240, 240),
-    Owners = {"IceMael7", "Douglinhas"},
-    Discord1 = "discord.gg/icehub",
-    Discord2 = "discord.gg/icealt",
-}
 
+-- Carrega as opções externas (deve retornar uma tabela)
+local Options = loadstring(game:HttpGet('https://gist.githubusercontent.com/hatak1212/1061fce46a132127ee16e3156eee6763/raw/51828610998f20eb73299aca919db83b00afaa4b/gistfile1.txt'))()
+
+-- Coloca as opções dentro do IceHub para serem usadas pela library
 IceHub.Options = Options
+
+-- Se quiser, define variáveis locais para facilitar o uso dentro desse arquivo
+local GameTitle = IceHub.Options.BrookhavenTitle
+local titlecolor = IceHub.Options.TitleColor
+local labelcolor = IceHub.Options.LabelColor
+local owners = IceHub.Options.Owners
+local discord1 = IceHub.Options.Discord1
+local discord2 = IceHub.Options.Discord2
 
 function IceHub.CreateMain()
 	local Library = Instance.new("ScreenGui")
