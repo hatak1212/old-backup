@@ -12,35 +12,43 @@ return {
             Elements = {
                 {
                     Type = "Toggle",
-                    Name = "Ativar ESP",
+                    Name = "🔍 Ativar ESP",
                     Default = false,
                     Callback = function(state)
-                        print("ESP ativado:", state)
+                        if state then
+                            print("[ESP] Ativado")
+                            -- Ative o ESP real aqui
+                        else
+                            print("[ESP] Desativado")
+                            -- Desative o ESP
+                        end
                     end
                 },
                 {
                     Type = "Textbox",
-                    Name = "Mensagem 1",
+                    Name = "📩 Mensagem 1 (Chat/GUI)",
                     Default = "",
                     Callback = function(value)
-                        print("Texto da Mensagem 1:", value)
+                        print("[Mensagem 1] Valor digitado:", value)
+                        -- Use a mensagem em alguma funcionalidade se necessário
                     end
                 },
                 {
                     Type = "Textbox",
-                    Name = "Mensagem 2",
+                    Name = "📩 Mensagem 2 (Chat/GUI)",
                     Default = "",
                     Callback = function(value)
-                        print("Texto da Mensagem 2:", value)
+                        print("[Mensagem 2] Valor digitado:", value)
                     end
                 },
                 {
                     Type = "Dropdown",
-                    Name = "Escolha uma opção",
-                    Options = {"Opção 1", "Opção 2", "Opção 3"},
-                    Default = "Opção 1",
+                    Name = "⚙️ Escolha uma opção",
+                    Options = {"💥 Opção 1", "🚗 Opção 2", "🔥 Opção 3"},
+                    Default = "💥 Opção 1",
                     Callback = function(selected)
-                        print("Dropdown selecionado:", selected)
+                        print("[Dropdown] Opção selecionada:", selected)
+                        -- Use isso para mudar modos, por exemplo.
                     end
                 }
             }
