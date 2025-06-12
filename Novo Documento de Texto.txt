@@ -7,13 +7,13 @@ local Options = loadstring(game:HttpGet('https://raw.githubusercontent.com/hatak
 IceHub.Options = Options
 
 -- Se quiser, define variáveis locais para facilitar o uso dentro desse arquivo
-local GameTitle  = Options.BrookhavenTitle
-local titlecolor = Options.TitleColor
-local labelcolor = Options.LabelColor
-local owners     = Options.Owners
-local discord1   = Options.Discord1
-local discord2   = Options.Discord2
-local tabs       = Options.Tabs
+local GameTitle  = Options.BrookhavenTitle or "Ice Hub"
+local TitleColor = Options.TitleColor or Color3.fromRGB(255, 255, 255)
+local LabelColor = Options.LabelColor or Color3.fromRGB(255, 255, 255)
+local Owners     = Options.Owners or {"Desconhecido"}
+local Discord1   = Options.Discord1 or "discord.gg/exemplo"
+local Discord2   = Options.Discord2 or ""
+local Tabs       = Options.Tabs or {}
 
 function IceHub.CreateMain()
 	local Library = Instance.new("ScreenGui")
