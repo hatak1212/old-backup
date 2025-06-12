@@ -9,46 +9,31 @@ return {
     Tabs = {
         {
             Name = "Principal",
-            Elements = {
+            Icon = "rbxassetid://6023426915", -- opcional
+            Content = {
                 {
                     Type = "Toggle",
-                    Name = "🔍 Ativar ESP",
+                    Text = "Ativar ESP",
                     Default = false,
                     Callback = function(state)
-                        if state then
-                            print("[ESP] Ativado")
-                            -- Ative o ESP real aqui
-                        else
-                            print("[ESP] Desativado")
-                            -- Desative o ESP
-                        end
+                        print("ESP:", state)
                     end
                 },
                 {
                     Type = "Textbox",
-                    Name = "📩 Mensagem 1 (Chat/GUI)",
+                    Text = "Mensagem 1",
                     Default = "",
-                    Callback = function(value)
-                        print("[Mensagem 1] Valor digitado:", value)
-                        -- Use a mensagem em alguma funcionalidade se necessário
-                    end
-                },
-                {
-                    Type = "Textbox",
-                    Name = "📩 Mensagem 2 (Chat/GUI)",
-                    Default = "",
-                    Callback = function(value)
-                        print("[Mensagem 2] Valor digitado:", value)
+                    Callback = function(v)
+                        print("Mensagem 1:", v)
                     end
                 },
                 {
                     Type = "Dropdown",
-                    Name = "⚙️ Escolha uma opção",
-                    Options = {"💥 Opção 1", "🚗 Opção 2", "🔥 Opção 3"},
-                    Default = "💥 Opção 1",
-                    Callback = function(selected)
-                        print("[Dropdown] Opção selecionada:", selected)
-                        -- Use isso para mudar modos, por exemplo.
+                    Text = "Escolha uma opção",
+                    Options = {"Opção 1", "Opção 2"},
+                    Default = "Opção 1",
+                    Callback = function(op)
+                        print("Selecionado:", op)
                     end
                 }
             }
