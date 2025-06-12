@@ -4,5 +4,46 @@ return {
     LabelColor = Color3.fromRGB(255, 255, 255),
     Owners = {"IceMael7", "Douglinhas"},
     Discord1 = "discord.gg/icehub",
-    Discord2 = "discord.gg/icealt"
+    Discord2 = "discord.gg/icealt",
+
+    Tabs = {
+        {
+            Name = "Principal",
+            Elements = {
+                {
+                    Type = "Toggle",
+                    Name = "Ativar ESP",
+                    Default = false,
+                    Callback = function(state)
+                        print("ESP ativado:", state)
+                    end
+                },
+                {
+                    Type = "Textbox",
+                    Name = "Mensagem 1",
+                    Default = "",
+                    Callback = function(value)
+                        print("Texto da Mensagem 1:", value)
+                    end
+                },
+                {
+                    Type = "Textbox",
+                    Name = "Mensagem 2",
+                    Default = "",
+                    Callback = function(value)
+                        print("Texto da Mensagem 2:", value)
+                    end
+                },
+                {
+                    Type = "Dropdown",
+                    Name = "Escolha uma opção",
+                    Options = {"Opção 1", "Opção 2", "Opção 3"},
+                    Default = "Opção 1",
+                    Callback = function(selected)
+                        print("Dropdown selecionado:", selected)
+                    end
+                }
+            }
+        }
+    }
 }
