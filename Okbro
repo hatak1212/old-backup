@@ -1,11 +1,8 @@
-local Options = {
-    Name = "Ice Hub - Brookhaven", -- Nome correto
-    Theme = {
-        Accent = Color3.fromRGB(0, 255, 255), -- Cor do título
-        Text = Color3.fromRGB(255, 255, 255)  -- Cor do texto
-    },
-    Credits = {
-        Owners = {"IceMael7", "Douglinhas"}, -- Donos
-        Discord = {"discord.gg/icehub", "discord.gg/icealt"} -- Links
-    }
+return {
+    BrookhavenTitle = "Ice Hub - Brookhaven",
+    TitleColor = Color3.fromRGB(0, 255, 255),
+    LabelColor = Color3.fromRGB(255, 255, 255),
+    Owners = {"IceMael7", "Douglinhas"},
+    Discord1 = "discord.gg/icehub",
+    Discord2 = "discord.gg/icealt"
 }
