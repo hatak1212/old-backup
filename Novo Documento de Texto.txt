@@ -13,6 +13,7 @@ local labelcolor = Options.LabelColor
 local owners     = Options.Owners
 local discord1   = Options.Discord1
 local discord2   = Options.Discord2
+local tabs       = Options.Tabs
 
 function IceHub.CreateMain()
 	local Library = Instance.new("ScreenGui")
