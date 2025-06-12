@@ -9,31 +9,44 @@ return {
     Tabs = {
         {
             Name = "Principal",
-            Icon = "rbxassetid://6023426915", -- opcional
             Content = {
                 {
                     Type = "Toggle",
                     Text = "Ativar ESP",
+                    Flag = "ESP",
                     Default = false,
-                    Callback = function(state)
-                        print("ESP:", state)
+                    Callback = function(value)
+                        print("ESP:", value)
                     end
                 },
                 {
                     Type = "Textbox",
                     Text = "Mensagem 1",
+                    Flag = "Msg1",
                     Default = "",
-                    Callback = function(v)
-                        print("Mensagem 1:", v)
+                    Placeholder = "Digite a mensagem",
+                    Callback = function(text)
+                        print("Mensagem 1:", text)
+                    end
+                },
+                {
+                    Type = "Textbox",
+                    Text = "Mensagem 2",
+                    Flag = "Msg2",
+                    Default = "",
+                    Placeholder = "Digite a mensagem",
+                    Callback = function(text)
+                        print("Mensagem 2:", text)
                     end
                 },
                 {
                     Type = "Dropdown",
                     Text = "Escolha uma opção",
-                    Options = {"Opção 1", "Opção 2"},
+                    Flag = "Drop",
+                    Options = {"Opção 1", "Opção 2", "Opção 3"},
                     Default = "Opção 1",
-                    Callback = function(op)
-                        print("Selecionado:", op)
+                    Callback = function(selected)
+                        print("Selecionado:", selected)
                     end
                 }
             }
