@@ -1,7 +1,7 @@
 local IceHub = {}
 
 -- Carrega as opções externas (deve retornar uma tabela)
-local Options = loadstring(game:HttpGet('https://gist.githubusercontent.com/hatak1212/1061fce46a132127ee16e3156eee6763/raw/51828610998f20eb73299aca919db83b00afaa4b/gistfile1.txt'))()
+local Options = loadstring(game:HttpGet('https://raw.githubusercontent.com/hatak1212/old-backup/refs/heads/main/Okbro'))()
 
 -- Coloca as opções dentro do IceHub para serem usadas pela library
 IceHub.Options = Options
