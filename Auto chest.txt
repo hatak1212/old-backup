@@ -1,0 +1,543 @@
+getgenv().Settings = setmetatable({
+    AutoChest = true,
+    HopServer = true,
+    HopAfterCollected = 5, -- << HopServer should be true
+}, {
+    __index = function(_, key)
+        return nil
+    end,
+    __newindex = function(_, key, value)
+        rawset(getgenv().Settings, key, value)
+    end,
+})
+
+repeat task.wait() until game:IsLoaded()
+
+task.wait(4)
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local plr = Players.LocalPlayer
+
+local function JoinTeam()
+    if plr.Team ~= game.Teams.Marines and plr.Team ~= game.Teams.Pirates then
+        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer("SetTeam", "Marines")
+    end
+end
+
+JoinTeam()
+
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local Speed = 350
+local placeId = game.PlaceId
+local ChestBlacklist = {}
+local ChestCount = 0
+local CurrentTween = nil
+local CurrentUI = nil
+local AllIDs = {}
+local foundAnything = ""
+local actualHour = os.date("!*t").hour
+local File = pcall(function()
+    AllIDs = HttpService:JSONDecode(readfile("NotSameServers.json"))
+end)
+if not File then
+    table.insert(AllIDs, actualHour)
+    writefile("NotSameServers.json", HttpService:JSONEncode(AllIDs))
+end
+
+local Sea = (function()
+    if placeId == 2753915549 then
+        return "1"
+    elseif placeId == 4442272183 then
+        return "2"
+    elseif placeId == 7449423635 then
+        return "3"
+    end
+end)()
+
+local Locations = {
+    ["1"] = {
+        {Position = Vector3.new(1109.97, 16.31, 1432.43)}, -- Starter Island Pirate
+        {Position = Vector3.new(-2753.58, 24.53, 2053.15)}, -- Starter Island Marine
+        {Position = Vector3.new(-1508.9, 11.89, -203.15)}, -- Jungle
+        {Position = Vector3.new(-1163.05, 4.79, 3819.38)}, -- Pirate Village
+        {Position = Vector3.new(922.16, 6.61, 4322.47)}, -- Desert
+        {Position = Vector3.new(-736.14, 7.89, 1594.09)}, -- Middle Island
+        {Position = Vector3.new(1151.51, 27.02, -1227.56)}, -- Frozen Village
+        {Position = Vector3.new(-2837.74, 7.46, 5325.27)}, -- Mob Island
+        {Position = Vector3.new(-4898.99, 41.29, 4469.95)}, -- Marine Fortress
+        {Position = Vector3.new(-4959.75, 3.91, -2394.3)}, -- Lower Sky Lands
+        {Position = Vector3.new(-4607.82, 874.39, -1667.56), Special = true}, -- Middle Sky Lands
+        {Position = Vector3.new(-7894.62, 5547.14, -380.29), Special = true}, -- Upper Sky Lands
+        {Position = Vector3.new(5043.19, 3.57, 745.1)}, -- Prison
+        {Position = Vector3.new(-1447.83, 7.33, -2852.95)}, -- Colosseum
+        {Position = Vector3.new(-5412.49, 11.11, 8454.28)}, -- Magma Village
+        {Position = Vector3.new(3864.69, 6.74, -1926.21), Special = true}, -- Whirlpool
+        {Position = Vector3.new(61163.85, 11.68, 1819.78), Special = true}, -- Underwater City
+        {Position = Vector3.new(5231.46, 38.54, 4067.5)}, -- Fountain City
+    },
+    ["2"] = {
+        {Position = Vector3.new(-16.19, 39.33, 2703.02)}, -- Kingdom of Rose
+        {Position = Vector3.new(-381.86, 73.08, 299.93)}, -- Cafe
+        {Position = Vector3.new(-335.05, 332.13, 710.97), Special = true}, -- Don Swan's Mansion
+        {Position = Vector3.new(2284.91, 15.54, 905.47), Special = true}, -- Swan Room
+        {Position = Vector3.new(4758.21, 8.39, 2851.75)}, -- Usoap's Island
+        {Position = Vector3.new(-2298.46, 73.04, -2780.78)}, -- Green Zone
+        {Position = Vector3.new(-5412.72, 48.55, -722.36)}, -- Graveyard Island
+        {Position = Vector3.new(920.65, 125.13, 32911.42), Special = true}, -- Ghost Ship
+        {Position = Vector3.new(-5160.39, 3.29, 2364.09)}, -- Cave Island
+        {Position = Vector3.new(785.03, 411.01, -5257.71)}, -- Snow Mountain
+        {Position = Vector3.new(-5460.62, 16.02, -5261.93)}, -- Hot & Cold (Hot)
+        {Position = Vector3.new(-5968.46, 16.02, -5096.35)}, -- Hot & Cold (Cold)
+        {Position = Vector3.new(6002.74, 294.46, -6612.14)}, -- Ice Castle
+        {Position = Vector3.new(3780.05, 22.72, -3499.52)}, -- Dark Arena
+        {Position = Vector3.new(-3052.7, 239.72, -10160.73)}, -- Forgotten Island
+    },
+    ["3"] = {
+        {Position = Vector3.new(-341.59, 20.68, 5539.96)}, -- Port Town
+        {
+            Position = Vector3.new(5704.74, 1013.12, -246.48),
+            SemiSpecial = true,
+            AltPosition = Vector3.new(5289.33, 1005.43, 393.16),
+            Condition = "KilledRipIndra"
+        }, -- Hydra Island
+        {Position = Vector3.new(2183.73, 21.79, -6690.29)}, -- Great Tree
+        {Position = Vector3.new(-10900.64, 331.83, -8680.53)}, -- Floating Turtle
+        {
+            Position = Vector3.new(-12548.55, 337.24, -7511.74),
+            SemiSpecial = true,
+            AltPosition = Vector3.new(-12550.87, 337.24, -7425.52),
+            Condition = "KilledRipIndra"
+        }, -- Mansion
+        {
+            Position = Vector3.new(-5165.25, 314.59, -3147.48),
+            SemiSpecial = true,
+            AltPosition = Vector3.new(-5067.71, 314.59, -2982.95),
+            Condition = "KilledRipIndra"
+        }, -- Castle On The Sea
+        {Position = Vector3.new(-9515.55, 142.18, 5533.04)}, -- Haunted Castle
+        {Position = Vector3.new(-2144.09, 47.79, -10031.44)}, -- Peanuts Island
+        {Position = Vector3.new(-853.49, 65.89, -10933.59)}, -- Ice Cream Island
+        {Position = Vector3.new(-2021.93, 37.87, -11971.52)}, -- Cake Island
+        {Position = Vector3.new(302.18, 28.38, -12693.71)}, -- Chocolate Island
+        {Position = Vector3.new(-1042.98, 14.87, -14147.93)}, -- Candy Cane Island
+        {Position = Vector3.new(-16207.59, 9.13, 438.58)}, -- Tiki Outpost 1
+        {Position = Vector3.new(-16688.46, 105.32, 1576.53)}, -- Tiki Outpost 2
+    }
+}
+
+local function createUI()
+    if CurrentUI then
+        CurrentUI.cleanup()
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "ServerHopUI"
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+    local blur = Instance.new("BlurEffect")
+    blur.Size = 15
+    blur.Parent = game:GetService("Lighting")
+
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Size = UDim2.new(0, 450, 0, 350)
+    mainFrame.Position = UDim2.new(0.5, -225, 0.5, -175)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(22, 27, 34)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 15)
+    uiCorner.Parent = mainFrame
+
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 41, 59)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(22, 27, 34)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(30, 41, 59))
+    })
+    gradient.Parent = mainFrame
+
+    local headerFrame = Instance.new("Frame")
+    headerFrame.Name = "Header"
+    headerFrame.Size = UDim2.new(1, 0, 0, 60)
+    headerFrame.BackgroundTransparency = 1
+    headerFrame.Parent = mainFrame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, 0, 1, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.Text = "🤒🤒🤒"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLabel.TextSize = 28
+    titleLabel.Parent = headerFrame
+
+    local statusFrame = Instance.new("Frame")
+    statusFrame.Name = "StatusFrame"
+    statusFrame.Size = UDim2.new(1, -40, 0, 80)
+    statusFrame.Position = UDim2.new(0, 20, 0, 80)
+    statusFrame.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
+    statusFrame.BorderSizePixel = 0
+    statusFrame.Parent = mainFrame
+
+    local statusCorner = Instance.new("UICorner")
+    statusCorner.CornerRadius = UDim.new(0, 10)
+    statusCorner.Parent = statusFrame
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Name = "StatusLabel"
+    statusLabel.Size = UDim2.new(1, -20, 1, 0)
+    statusLabel.Position = UDim2.new(0, 10, 0, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Font = Enum.Font.GothamSemibold
+    statusLabel.TextColor3 = Color3.fromRGB(199, 210, 254)
+    statusLabel.TextSize = 18
+    statusLabel.TextWrapped = true
+    statusLabel.Parent = statusFrame
+
+    local progressFrame = Instance.new("Frame")
+    progressFrame.Name = "ProgressFrame"
+    progressFrame.Size = UDim2.new(1, -40, 0, 8)
+    progressFrame.Position = UDim2.new(0, 20, 0, 180)
+    progressFrame.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
+    progressFrame.BorderSizePixel = 0
+    progressFrame.Parent = mainFrame
+
+    local progressCorner = Instance.new("UICorner")
+    progressCorner.CornerRadius = UDim.new(1, 0)
+    progressCorner.Parent = progressFrame
+
+    local progressBar = Instance.new("Frame")
+    progressBar.Name = "ProgressBar"
+    progressBar.Size = UDim2.new(0, 0, 1, 0)
+    progressBar.BackgroundColor3 = Color3.fromRGB(99, 102, 241)
+    progressBar.BorderSizePixel = 0
+    progressBar.Parent = progressFrame
+
+    local progressBarCorner = Instance.new("UICorner")
+    progressBarCorner.CornerRadius = UDim.new(1, 0)
+    progressBarCorner.Parent = progressBar
+
+    local statsFrame = Instance.new("Frame")
+    statsFrame.Name = "StatsFrame"
+    statsFrame.Size = UDim2.new(1, -40, 0, 100)
+    statsFrame.Position = UDim2.new(0, 20, 0, 210)
+    statsFrame.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
+    statsFrame.BorderSizePixel = 0
+    statsFrame.Parent = mainFrame
+
+    local statsCorner = Instance.new("UICorner")
+    statsCorner.CornerRadius = UDim.new(0, 10)
+    statsCorner.Parent = statsFrame
+
+    local statsLabel = Instance.new("TextLabel")
+    statsLabel.Size = UDim2.new(1, -20, 1, 0)
+    statsLabel.Position = UDim2.new(0, 10, 0, 0)
+    statsLabel.BackgroundTransparency = 1
+    statsLabel.Font = Enum.Font.Gotham
+    statsLabel.TextColor3 = Color3.fromRGB(156, 163, 175)
+    statsLabel.TextSize = 14
+    statsLabel.TextXAlignment = Enum.TextXAlignment.Left
+    statsLabel.TextYAlignment = Enum.TextYAlignment.Top
+    statsLabel.Parent = statsFrame
+    local gradientRotation = 0
+    local gradientConnection = RunService.Heartbeat:Connect(function()
+        gradientRotation = (gradientRotation + 0.1) % 360
+        gradient.Rotation = gradientRotation
+    end)
+    screenGui.Parent = game:GetService("CoreGui")
+    CurrentUI = {
+        gui = screenGui,
+        blur = blur,
+        statusLabel = statusLabel,
+        progressBar = progressBar,
+        statsLabel = statsLabel,
+        gradientConnection = gradientConnection,
+        cleanup = function()
+            gradientConnection:Disconnect()
+            blur:Destroy()
+            screenGui:Destroy()
+        end
+    }
+
+    return CurrentUI
+end
+
+local function updateUI(status, progress, stats)
+    if not CurrentUI then return end
+    if status then
+        CurrentUI.statusLabel.Text = status
+    end
+    if progress then
+        CurrentUI.progressBar:TweenSize(
+            UDim2.new(progress, 0, 1, 0),
+            Enum.EasingDirection.Out,
+            Enum.EasingStyle.Quad,
+            0.3,
+            true
+        )
+    end
+    if stats then
+        CurrentUI.statsLabel.Text = stats
+    end
+end
+
+local function TPReturner()
+    local Site
+    if foundAnything == "" then
+        Site = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. placeId .. '/servers/Public?sortOrder=Asc&limit=100'))
+    else
+        Site = HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. placeId .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+    end
+    
+    if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+        foundAnything = Site.nextPageCursor
+    end
+    
+    local num = 0
+    for i, v in pairs(Site.data) do
+        local Possible = true
+        local ID = tostring(v.id)
+        if tonumber(v.maxPlayers) > tonumber(v.playing) then
+            for _, Existing in pairs(AllIDs) do
+                if num ~= 0 then
+                    if ID == tostring(Existing) then
+                        Possible = false
+                    end
+                else
+                    if tonumber(actualHour) ~= tonumber(Existing) then
+                        local delFile = pcall(function()
+                            delfile("NotSameServers.json")
+                            AllIDs = {}
+                            table.insert(AllIDs, actualHour)
+                        end)
+                    end
+                end
+                num = num + 1
+            end
+            
+            if Possible == true then
+                table.insert(AllIDs, ID)
+                task.wait()
+                pcall(function()
+                    writefile("NotSameServers.json", HttpService:JSONEncode(AllIDs))
+                    task.wait()
+                    TeleportService:TeleportToPlaceInstance(placeId, ID, LocalPlayer)
+                end)
+                task.wait(4)
+            end
+        end
+    end
+end
+
+local function serverHop()
+    local ui = createUI()
+    updateUI("Server hopping...", 0.5, string.format(
+        "Current Server: %s\nPlayers: %d\nChests Collected: %d",
+        game.JobId,
+        #Players:GetPlayers(),
+        ChestCount
+    ))
+    while task.wait() do
+        pcall(function()
+            TPReturner()
+            if foundAnything ~= "" then
+                TPReturner()
+            end
+        end)
+    end
+end
+
+local function enableNoclip()
+    local connection = RunService.Stepped:Connect(function()
+        if Character and Character:FindFirstChild("HumanoidRootPart") then
+            for _, part in ipairs(Character:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end)
+    return connection
+end
+
+local function tweenToPosition(targetPosition, special, callback)
+    if CurrentTween then
+        CurrentTween:Cancel()
+        CurrentTween = nil
+    end
+
+    if special then
+        local args = {
+            [1] = "requestEntrance",
+            [2] = targetPosition
+        }
+        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer(unpack(args))
+        task.wait(1)
+        
+        if (Character.HumanoidRootPart.Position - targetPosition).Magnitude > 50 then
+            tweenToPosition(targetPosition, false, callback)
+        else
+            if callback then callback() end
+        end
+        return
+    end
+
+    local distance = (targetPosition - HumanoidRootPart.Position).Magnitude
+    if distance <= 350 then
+        HumanoidRootPart.CFrame = CFrame.new(targetPosition)
+        if callback then callback() end
+        return
+    end
+
+    local noclipConnection = enableNoclip()
+    local gyro = Instance.new("BodyGyro")
+    gyro.MaxTorque = Vector3.new(1e7, 1e7, 1e7)
+    gyro.D = 100
+    gyro.P = 10000
+    gyro.CFrame = HumanoidRootPart.CFrame
+    gyro.Parent = HumanoidRootPart
+    local bv = Instance.new("BodyVelocity")
+    bv.MaxForce = Vector3.new(1e7, 1e7, 1e7)
+    bv.Velocity = Vector3.new(0, 0, 0)
+    bv.P = 2500
+    bv.Parent = HumanoidRootPart
+    local startTime = tick()
+    local estimatedTime = distance / Speed
+    local connection
+
+    connection = RunService.Heartbeat:Connect(function()
+        if not Character:FindFirstChild("HumanoidRootPart") then
+            connection:Disconnect()
+            return
+        end
+
+        local currentTime = tick() - startTime
+        local alpha = math.min(currentTime / estimatedTime, 1)
+        
+        local currentTarget = HumanoidRootPart.Position:Lerp(targetPosition, alpha)
+        local lookAt = CFrame.lookAt(HumanoidRootPart.Position, currentTarget)
+        gyro.CFrame = lookAt
+
+        local direction = (currentTarget - HumanoidRootPart.Position).Unit
+        bv.Velocity = direction * Speed
+
+        if alpha >= 1 or (HumanoidRootPart.Position - targetPosition).Magnitude < 10 then
+            connection:Disconnect()
+            noclipConnection:Disconnect()
+            bv:Destroy()
+            gyro:Destroy()
+            
+            HumanoidRootPart.CFrame = CFrame.new(targetPosition)
+            
+            if callback then callback() end
+        end
+    end)
+
+    CurrentTween = {
+        Cancel = function()
+                if connection then connection:Disconnect() end
+                if noclipConnection then noclipConnection:Disconnect() end
+                if bv then bv:Destroy() end
+                if gyro then gyro:Destroy() end
+            end
+        }
+    end
+
+local function getClosestChest()
+    local ChestModels = workspace:FindFirstChild("ChestModels")
+    if not ChestModels then return nil end
+    
+    local closestChest, closestDistance = nil, math.huge
+    for _, chest in ipairs(ChestModels:GetChildren()) do
+        if chest:IsA("Model") and chest.PrimaryPart and not ChestBlacklist[chest] then
+            local distance = (HumanoidRootPart.Position - chest.PrimaryPart.Position).Magnitude
+            if distance < closestDistance then
+                closestChest, closestDistance = chest, distance
+            end
+        end
+    end
+    return closestChest
+end
+
+local function onChestAdded(chest)
+    if not Settings.AutoChest then return end
+    
+    if chest:IsA("Model") and chest.PrimaryPart and not ChestBlacklist[chest] then
+        local distance = (HumanoidRootPart.Position - chest.PrimaryPart.Position).Magnitude
+        if distance <= 100 then
+            tweenToPosition(chest.PrimaryPart.Position, false, function()
+                ChestBlacklist[chest] = true
+                ChestCount = ChestCount + 1
+                if Settings.HopServer and Settings.HopAfterCollected and ChestCount >= Settings.HopAfterCollected then
+                    serverHop()
+                end
+            end)
+        end
+    end
+end
+
+local function findAndMoveToChest()
+    while Settings.AutoChest do
+        local chest = getClosestChest()
+        if chest then
+            local pos = chest.PrimaryPart.Position
+            tweenToPosition(pos, false, function()
+                ChestBlacklist[chest] = true
+                ChestCount = ChestCount + 1
+                if Settings.HopServer and Settings.HopAfterCollected and ChestCount >= Settings.HopAfterCollected then
+                    serverHop()
+                else
+                    task.wait(0.5)
+                    findAndMoveToChest()
+                end
+            end)
+            return
+        else
+            local locs = Locations[Sea]
+            if not locs then return end
+
+            local randomLoc = locs[math.random(1, #locs)]
+            tweenToPosition(
+                randomLoc.Position,
+                randomLoc.Special,
+                function()
+                    local newChest = getClosestChest()
+                    if newChest then
+                        local newChestPos = newChest.PrimaryPart.Position
+                        tweenToPosition(newChestPos, false, function()
+                            ChestBlacklist[newChest] = true
+                            ChestCount = ChestCount + 1
+                            if Settings.HopServer and Settings.HopAfterCollected and ChestCount >= Settings.HopAfterCollected then
+                                serverHop()
+                            else
+                                task.wait(0.5)
+                                findAndMoveToChest()
+                            end
+                        end)
+                    else
+                        task.wait(0.5)
+                        findAndMoveToChest()
+                    end
+                end
+            )
+            return
+        end
+    end
+end
+
+do
+    workspace:WaitForChild("ChestModels").ChildAdded:Connect(onChestAdded)
+    findAndMoveToChest()
+end
