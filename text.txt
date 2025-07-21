@@ -1,0 +1,47 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Aguarda LocalPlayer com proteção contra nil
+local LocalPlayer
+repeat
+    LocalPlayer = Players.LocalPlayer
+    task.wait()
+until LocalPlayer
+
+-- Verifica ou cria o RemoteEvent de comunicação com o painel
+local DouglinhasCMD = ReplicatedStorage:FindFirstChild("DouglinhasCMD")
+if not DouglinhasCMD then
+    DouglinhasCMD = Instance.new("RemoteEvent")
+    DouglinhasCMD.Name = "DouglinhasCMD"
+    DouglinhasCMD.Parent = ReplicatedStorage
+    print("[Loader] RemoteEvent 'DouglinhasCMD' criado.")
+else
+    print("[Loader] RemoteEvent 'DouglinhasCMD' encontrado.")
+end
+
+-- URL exata do Hub (mantida sem alteração)
+local urlDoHub = "https://raw.githubusercontent.com/Daivd977/Deivd999/refs/heads/main/pessal"
+
+print("[Loader] Tentando carregar o Hub na URL:")
+print("> " .. urlDoHub)
+
+local sucesso, retorno = pcall(function()
+    return loadstring(game:HttpGet(urlDoHub))()
+end)
+
+if sucesso then
+    print("[✔️] Hub carregado com sucesso!")
+
+    -- Dispara evento para confirmar inicialização ao painel (opcional)
+    local ok, erroEvento = pcall(function()
+        DouglinhasCMD:FireServer("loaderStatus", "hubCarregado")
+        print("[✔️] Evento 'loaderStatus' enviado para o painel.")
+    end)
+
+    if not ok then
+        warn("[❌] Erro ao enviar evento para painel:", erroEvento)
+    end
+else
+    warn("[❌] Falha ao carregar o Hub:")
+    warn(tostring(retorno))
+end
